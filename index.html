@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MjengoAI PRO — Project Monitor — Mjengo Constituency</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root {
+    --bg: #0b0b0b;
+    --panel: #131313;
+    --panel-2: #1a1a1a;
+    --border: #2b2b2b;
+    --text: #fff;
+    --text-dim: #999;
+    --text-dimmer: #666;
+    --accent: #D85A30;
+    --blue: #378add;
+    --amber: #c98500;
+    --green: #0ca30c;
+    --ok: #5DCAA5;
+    --ok-bg: rgba(93,202,165,.12);
+    --warn: #D8A030;
+    --warn-bg: rgba(216,160,48,.12);
+    --err: #e05a4f;
+    --err-bg: rgba(224,90,79,.12);
+    --radius: 8px;
+  }
+  * { box-sizing: border-box; min-width: 0; }
+  html, body {
+    margin: 0; padding: 0; background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 15.5px; overflow-x: hidden;
+  }
+  .shell { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; }
+  .sidebar { border-right: 1px solid var(--border); background: var(--panel); padding: 18px 10px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .brand { font-size: 16px; font-weight: 700; padding: 4px 10px 4px; }
+  .brand .accent { color: var(--accent); }
+  .brand-sub { font-size: 11.5px; color: var(--text-dim); padding: 0 10px 16px; }
+  .group-label { font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--text-dimmer); padding: 0 10px; margin: 14px 0 6px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-radius: 6px; font-size: 14px; color: var(--text-dim); margin-bottom: 1px; }
+  .nav-icon { display: flex; flex-shrink: 0; }
+  .nav-icon svg { width: 15px; height: 15px; stroke: currentColor; }
+  .nav-item.active { background: rgba(216,90,48,.1); color: var(--accent); font-weight: 600; }
+  .main { padding: 26px 32px 60px; max-width: 100%; }
+  .page-title { font-size: 22px; font-weight: 700; margin: 0; }
+  .page-title .accent { color: var(--accent); }
+  .page-sub { font-size: 13.5px; color: var(--text-dim); margin-top: 4px; }
+  .actions { display: flex; gap: 10px; margin-top: 14px; }
+  .btn { background: var(--panel-2); border: 1px solid var(--border); color: var(--text); border-radius: var(--radius); padding: 8px 14px; font-size: 13.5px; cursor: pointer; }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .stat-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 20px 0; }
+  .stat-tile { border-radius: var(--radius); padding: 14px; background: var(--panel); border: 1px solid var(--border); }
+  .stat-tile .label { font-size: 12px; text-transform: uppercase; letter-spacing: .03em; margin-bottom: 8px; color: var(--text-dim); }
+  .stat-tile .num { font-size: 27px; font-weight: 700; line-height: 1; }
+  .stat-tile.blue { background: rgba(55,138,221,.12); border-color: rgba(55,138,221,.3); }
+  .stat-tile.blue .label, .stat-tile.blue .num { color: var(--blue); }
+  .stat-tile.amber { background: rgba(201,133,0,.14); border-color: rgba(201,133,0,.3); }
+  .stat-tile.amber .label, .stat-tile.amber .num { color: var(--amber); }
+  .stat-tile.green { background: rgba(12,163,12,.12); border-color: rgba(12,163,12,.3); }
+  .stat-tile.green .label, .stat-tile.green .num { color: var(--green); }
+  .stat-tile.warn { background: var(--warn-bg); border-color: rgba(216,160,48,.3); }
+  .stat-tile.warn .label, .stat-tile.warn .num { color: var(--warn); }
+  .stat-tile.err { background: var(--err-bg); border-color: rgba(224,90,79,.3); }
+  .stat-tile.err .label, .stat-tile.err .num { color: var(--err); }
+  .section-label { font-size: 13.5px; color: var(--text-dim); margin: 26px 0 10px; }
+  .row-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; }
+  .row-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; margin-top: 14px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+  .card h3 { font-size: 16px; font-weight: 600; margin: 0 0 3px; }
+  .card .desc { font-size: 13px; color: var(--text-dim); margin: 0 0 12px; }
+  .donut-wrap { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .donut-box { position: relative; width: 112px; height: 112px; flex-shrink: 0; }
+  .legend-row { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; cursor: pointer; margin: 0 -8px; font-size: 14px; }
+  .legend-row:hover { background: var(--panel-2); }
+  .legend-row.active { background: var(--panel-2); outline: 1px solid var(--border); }
+  .legend-row .sw { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
+  .legend-row .name { flex: 1; color: var(--text-dim); }
+  .legend-row .n { font-weight: 700; }
+  .silent-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: var(--err-bg); border-radius: 8px; margin-bottom: 8px; gap: 10px; flex-wrap: wrap; }
+  .silent-row .p { font-size: 14px; color: var(--err); }
+  .silent-row .d { font-size: 15.5px; font-weight: 700; color: var(--err); }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; padding: 9px 12px; color: var(--text-dimmer); font-weight: 600; text-transform: uppercase; font-size: 11.5px; letter-spacing: .03em; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  th.num, td.num { text-align: right; }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+  tr:last-child td { border-bottom: none; }
+  .badge { font-size: 12px; padding: 3px 8px; border-radius: var(--radius); font-weight: 600; white-space: nowrap; }
+  .badge.ontrack { background: var(--ok-bg); color: var(--ok); }
+  .badge.attention { background: var(--warn-bg); color: var(--warn); }
+  .badge.stalled { background: var(--err-bg); color: var(--err); }
+  select { background: var(--panel-2); border: 1px solid var(--border); color: var(--text); border-radius: var(--radius); padding: 6px 10px; font-size: 13.5px; }
+  .assumptions { margin-top: 26px; border-top: 1px solid var(--border); padding-top: 14px; font-size: 12px; color: var(--text-dimmer); line-height: 1.6; }
+  @media print {
+    .sidebar, .actions { display: none; }
+    .shell { grid-template-columns: 1fr; }
+    body { background: #fff; color: #000; }
+  }
+  @media (max-width: 860px) {
+    .shell { grid-template-columns: 1fr; }
+    .sidebar { position: static; height: auto; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+    .sidebar .brand, .sidebar .brand-sub, .sidebar .group-label { flex-basis: 100%; }
+    .main { padding: 20px 16px 40px; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="sidebar">
+    <div class="brand">MjengoAI <span class="accent">PRO</span></div>
+    <div class="brand-sub">TEAM · MJENGO CONSTITUENCY</div>
+    <div class="group-label">Dashboard</div>
+    <div class="nav-item active"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>Project Monitor</div>
+    <div class="group-label">Projects</div>
+    <div class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg></span>My projects (8)</div>
+    <div class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>Financial report</div>
+    <div class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>Contractors</div>
+    <div class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>Pending actions</div>
+    <div class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>Snags across projects</div>
+    <div class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>Permits expiring soon</div>
+    <div class="group-label">Site reports</div>
+    <div class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>Daily report</div>
+    <div class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span>Verification log</div>
+    <div class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>Site diary / labor log</div>
+  </div>
+  <div class="main">
+    <p class="page-title">Mjengo Constituency — <span class="accent">Project Monitor</span></p>
+    <p class="page-sub">NG-CDF construction portfolio · KES 120,000,000 planned · 8 projects</p>
+    <div class="actions">
+      <button class="btn" onclick="window.print()">Generate report</button>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-tile"><div class="label">Total projects</div><div class="num">8</div></div>
+      <div class="stat-tile blue"><div class="label">Budget planned</div><div class="num">KES 120M</div></div>
+      <div class="stat-tile amber"><div class="label">Paid to date</div><div class="num">KES 59.6M</div></div>
+      <div class="stat-tile green"><div class="label">Balance</div><div class="num">KES 60.4M</div></div>
+      <div class="stat-tile warn"><div class="label">Pending actions</div><div class="num">10</div></div>
+      <div class="stat-tile err"><div class="label">Stalled</div><div class="num">2</div></div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-tile"><div class="label">Verification pass rate</div><div class="num">83%</div></div>
+      <div class="stat-tile"><div class="label">Avg. IPC turnaround</div><div class="num">20 days</div></div>
+      <div class="stat-tile warn"><div class="label">Permits expiring soon</div><div class="num">3</div></div>
+      <div class="stat-tile"><div class="label">Contractors on portfolio</div><div class="num">4</div></div>
+    </div>
+
+    <div class="row-2">
+      <div class="card">
+        <h3>Portfolio health</h3>
+        <p class="desc">Click a slice or legend row to filter the list below</p>
+        <div class="donut-wrap">
+          <div class="donut-box"><canvas id="healthDonut" role="img" aria-label="Donut chart of project health across 8 projects">On track 4, needs attention 2, stalled 2</canvas></div>
+          <div id="legend" style="flex:1;"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Budget by sector</h3>
+        <p class="desc">KES planned, all 8 projects</p>
+        <div class="donut-wrap">
+          <div class="donut-box"><canvas id="sectorDonut" role="img" aria-label="Budget by sector: schools 39M, community 37M, health 22M, bridges 12.5M, water 9.5M">Schools 39M, Community 37M, Health 22M, Bridges 12.5M, Water 9.5M</canvas></div>
+          <div id="sectorLegend" style="flex:1;"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row-3">
+      <div class="card">
+        <h3>Days silent — stalled projects</h3>
+        <p class="desc">Days since last verified progress update</p>
+        <div class="silent-row"><span class="p">Mjengo Market Sheds — Phase 2</span><span class="d">1,476 days</span></div>
+        <div class="silent-row"><span class="p">Community ECD Centre</span><span class="d">1,018 days</span></div>
+      </div>
+      <div class="card">
+        <h3>Contractors on the portfolio</h3>
+        <p class="desc">Projects, stalled count, and average IPC turnaround per contractor</p>
+        <div class="table-wrap">
+        <table>
+          <thead><tr><th>Contractor</th><th class="num">Projects</th><th class="num">Stalled</th><th class="num">Avg. IPC days</th></tr></thead>
+          <tbody id="contractorRows"></tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px;">
+      <h3>Budget paid vs planned, by project</h3>
+      <p class="desc">KES, all 8 projects</p>
+      <div style="position:relative;width:100%;height:220px;">
+        <canvas id="budgetChart" role="img" aria-label="Bar chart comparing budget paid to budget planned per project"></canvas>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <h3 style="margin:0;">Disbursement pace — planned vs actual</h3>
+        <select id="fySelect">
+          <option value="fy2627">FY 2026/27 (current)</option>
+          <option value="fy2526">FY 2025/26</option>
+        </select>
+      </div>
+      <p class="desc">Cumulative KES disbursed against the fiscal-year plan, July–June</p>
+      <div style="position:relative;width:100%;height:220px;">
+        <canvas id="paceChart" role="img" aria-label="Line chart comparing planned and actual cumulative disbursement across the fiscal year"></canvas>
+      </div>
+    </div>
+
+    <p class="section-label" id="listLabel">All 8 projects</p>
+    <div class="card table-wrap" style="padding:0;">
+      <table>
+        <thead>
+          <tr>
+            <th>Health</th><th>Project</th><th>Contractor</th><th>Target date</th>
+            <th class="num">Planned (KES)</th><th class="num">Paid (KES)</th><th class="num">Pending</th>
+          </tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+
+    <div class="assumptions">
+      Sample data for demonstration — project names, dates, contractors, verification and IPC figures, and budget splits are placeholders and should be replaced with Mjengo Constituency's actual NG-CDF records before this is used for real reporting or shared with the PMC or Auditor-General's office.
+    </div>
+  </div>
+</div>
+
+<script>
+const projects = [
+  { name: 'Mjengo Primary School — Classroom Block', contractor: 'BuildRight Contractors Ltd', target: '15 Mar 2027', planned: 18000000, paid: 9500000, pending: 0, health: 'ontrack' },
+  { name: 'Mjengo Health Centre — Maternity Wing', contractor: 'Nyota Engineering Works', target: '30 Nov 2026', planned: 22000000, paid: 6000000, pending: 2, health: 'attention' },
+  { name: 'Kivumbini Water Project — Borehole & Tank', contractor: 'Jenga Bora Ltd', target: '1 Jun 2027', planned: 9500000, paid: 0, pending: 0, health: 'ontrack' },
+  { name: 'Mjengo Market Sheds — Phase 2', contractor: 'Nyota Engineering Works', target: '30 Aug 2022', planned: 14000000, paid: 11200000, pending: 3, health: 'stalled' },
+  { name: 'Riverside Foot Bridge', contractor: 'BuildRight Contractors Ltd', target: '20 May 2026', planned: 12500000, paid: 12500000, pending: 0, health: 'ontrack' },
+  { name: 'Mjengo Girls Secondary — Dormitory', contractor: 'Kilimo Construction Co', target: '15 Jan 2028', planned: 21000000, paid: 0, pending: 0, health: 'ontrack' },
+  { name: "Chief's Camp Office Renovation", contractor: 'Kilimo Construction Co', target: '10 Apr 2026', planned: 6000000, paid: 5400000, pending: 1, health: 'attention' },
+  { name: 'Community ECD Centre — Kivumbini', contractor: 'BuildRight Contractors Ltd', target: '1 Dec 2023', planned: 17000000, paid: 15000000, pending: 4, health: 'stalled' }
+];
+const badge = { stalled: ['stalled', 'Stalled'], attention: ['attention', 'Needs attention'], ontrack: ['ontrack', 'On track'] };
+const healthColors = { stalled: '#e05a4f', attention: '#D8A030', ontrack: '#5DCAA5' };
+let activeFilter = null;
+
+function renderLegend() {
+  const counts = { ontrack: 0, attention: 0, stalled: 0 };
+  projects.forEach(p => counts[p.health]++);
+  document.getElementById('legend').innerHTML = Object.keys(counts).map(k => `
+    <div class="legend-row ${activeFilter === k ? 'active' : ''}" data-k="${k}">
+      <span class="sw" style="background:${healthColors[k]}"></span>
+      <span class="name">${badge[k][1]}</span><span class="n">${counts[k]}</span>
+    </div>`).join('');
+  document.querySelectorAll('#legend .legend-row').forEach(el => el.addEventListener('click', () => {
+    activeFilter = activeFilter === el.dataset.k ? null : el.dataset.k;
+    renderLegend(); renderRows();
+  }));
+}
+function renderRows() {
+  const rows = activeFilter ? projects.filter(p => p.health === activeFilter) : projects;
+  document.getElementById('listLabel').textContent = activeFilter ? `${rows.length} ${badge[activeFilter][1].toLowerCase()}` : `All ${projects.length} projects`;
+  document.getElementById('rows').innerHTML = rows.map(p => `
+    <tr>
+      <td><span class="badge ${badge[p.health][0]}">${badge[p.health][1]}</span></td>
+      <td>${p.name}</td><td>${p.contractor}</td><td>${p.target}</td>
+      <td class="num">${p.planned.toLocaleString('en-KE')}</td>
+      <td class="num">${p.paid.toLocaleString('en-KE')}</td>
+      <td class="num">${p.pending}</td>
+    </tr>`).join('');
+}
+renderLegend(); renderRows();
+
+new Chart(document.getElementById('healthDonut'), {
+  type: 'doughnut',
+  data: { labels: ['On track','Needs attention','Stalled'], datasets: [{ data: [4,2,2], backgroundColor: [healthColors.ontrack, healthColors.attention, healthColors.stalled], borderWidth: 2, borderColor: '#131313' }] },
+  options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { display: false } },
+    onClick: (evt, els) => { if (!els.length) return; const k = ['ontrack','attention','stalled'][els[0].index]; activeFilter = activeFilter === k ? null : k; renderLegend(); renderRows(); } }
+});
+
+const sectors = [
+  { name: 'Schools', value: 39000000, color: '#378add' },
+  { name: 'Community', value: 37000000, color: '#7f77dd' },
+  { name: 'Health', value: 22000000, color: '#d4537e' },
+  { name: 'Bridges', value: 12500000, color: '#1baf7a' },
+  { name: 'Water', value: 9500000, color: '#eda100' }
+];
+document.getElementById('sectorLegend').innerHTML = sectors.map(s => `
+  <div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:13.5px;">
+    <span style="width:9px;height:9px;border-radius:2px;background:${s.color};flex-shrink:0;"></span>
+    <span style="flex:1;color:var(--text-dim);">${s.name}</span><span style="font-weight:700;">${Math.round(s.value/1000000)}M</span>
+  </div>`).join('');
+new Chart(document.getElementById('sectorDonut'), {
+  type: 'doughnut',
+  data: { labels: sectors.map(s=>s.name), datasets: [{ data: sectors.map(s=>s.value), backgroundColor: sectors.map(s=>s.color), borderWidth: 2, borderColor: '#131313' }] },
+  options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { display: false } } }
+});
+
+const contractors = [
+  { name: 'BuildRight Contractors Ltd', projects: 3, stalled: 1, avgIpc: 18 },
+  { name: 'Nyota Engineering Works', projects: 2, stalled: 1, avgIpc: 28 },
+  { name: 'Kilimo Construction Co', projects: 2, stalled: 0, avgIpc: 12 },
+  { name: 'Jenga Bora Ltd', projects: 1, stalled: 0, avgIpc: null }
+];
+document.getElementById('contractorRows').innerHTML = contractors.map(c => `
+  <tr>
+    <td>${c.name}</td><td class="num">${c.projects}</td>
+    <td class="num" style="${c.stalled ? 'color:var(--err);font-weight:700;' : ''}">${c.stalled}</td>
+    <td class="num">${c.avgIpc !== null ? c.avgIpc + ' days' : '—'}</td>
+  </tr>`).join('');
+
+new Chart(document.getElementById('budgetChart'), {
+  type: 'bar',
+  data: {
+    labels: projects.map(p => p.name.length > 22 ? p.name.slice(0, 20) + '…' : p.name),
+    datasets: [
+      { label: 'Planned', data: projects.map(p => p.planned), backgroundColor: '#2b2b2b', borderRadius: 3, maxBarThickness: 14 },
+      { label: 'Paid', data: projects.map(p => p.paid), backgroundColor: '#D85A30', borderRadius: 3, maxBarThickness: 14 }
+    ]
+  },
+  options: {
+    indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: true, labels: { color: '#999', font: { size: 11 } } },
+      tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': KES ' + ctx.raw.toLocaleString('en-KE') } }
+    },
+    scales: {
+      x: { ticks: { color: '#999', font: { size: 10 }, callback: v => (v / 1000000) + 'M' }, grid: { color: '#222' } },
+      y: { ticks: { color: '#999', font: { size: 10 } }, grid: { display: false } }
+    }
+  }
+});
+
+const months = ['Jul','Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun'];
+const paceData = {
+  fy2627: { planned: [4.17,8.33,12.5,16.67,20.83,25,29.17,33.33,37.5,41.67,45.83,50], actual: [3,9,18,null,null,null,null,null,null,null,null,null] },
+  fy2526: { planned: [3.75,7.5,11.25,15,18.75,22.5,26.25,30,33.75,37.5,41.25,45], actual: [2,5,8,12,16,19,23,27,30,33,37,40] }
+};
+let paceChart;
+function renderPace(key) {
+  const d = paceData[key];
+  if (paceChart) paceChart.destroy();
+  paceChart = new Chart(document.getElementById('paceChart'), {
+    type: 'line',
+    data: { labels: months, datasets: [
+      { label: 'Planned', data: d.planned, borderColor: '#378add', backgroundColor: 'transparent', borderDash: [4,3], tension: 0.2, pointRadius: 0 },
+      { label: 'Actual', data: d.actual, borderColor: '#D85A30', backgroundColor: 'transparent', tension: 0.2, pointRadius: 3, spanGaps: false }
+    ]},
+    options: { responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: true, labels: { color: '#999', font: { size: 12 } } },
+        tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': KES ' + ctx.raw + 'M' } } },
+      scales: {
+        x: { ticks: { color: '#999', font: { size: 11 } }, grid: { color: '#222' } },
+        y: { ticks: { color: '#999', font: { size: 11 }, callback: v => v + 'M' }, grid: { color: '#222' } }
+      } }
+  });
+}
+renderPace('fy2627');
+document.getElementById('fySelect').addEventListener('change', e => renderPace(e.target.value));
+</script>
+</body>
+</html>
