@@ -92,9 +92,34 @@
   @media print { .sidebar, .actions { display:none; } .shell { grid-template-columns:1fr; } body { background:#fff; color:#000; } }
   @media (max-width:860px) {
     .shell { grid-template-columns:1fr; }
-    .sidebar { position:static; height:auto; display:flex; flex-wrap:wrap; gap:4px; align-items:center; }
-    .sidebar .brand, .sidebar .brand-sub, .sidebar .group-label { flex-basis:100%; }
-    .main { padding:20px 16px 40px; }
+    .sidebar { position:static; height:auto; padding:10px 12px; }
+    .sidebar .brand { display:inline-block; padding:0 8px 0 0; }
+    .sidebar .brand-sub { display:none; }
+    .sidebar .group-label { display:none; }
+    .sidebar { display:flex; align-items:center; gap:4px; overflow-x:auto; -webkit-overflow-scrolling:touch; white-space:nowrap; }
+    .nav-item { flex-shrink:0; padding:7px 12px; border-radius:999px; background:var(--panel-2); margin-bottom:0; }
+    .nav-item.active { background:rgba(55,138,221,.18); }
+    .main { padding:16px 14px 40px; }
+    .page-title { font-size:19px; line-height:1.3; }
+    .page-sub { font-size:13px; }
+    .mockup-banner { padding:10px 12px; }
+    .mockup-banner .tx { font-size:13px; }
+    .stat-row { grid-template-columns:repeat(2,1fr); gap:8px; margin:14px 0; }
+    .stat-tile { padding:11px; }
+    .stat-tile .num { font-size:21px; }
+    .stat-tile .label { font-size:11px; margin-bottom:5px; }
+    .row-2, .row-3 { grid-template-columns:1fr; gap:10px; }
+    .card { padding:13px; }
+    .card h3 { font-size:16px; }
+    .donut-box { width:96px; height:96px; }
+    table { font-size:13px; }
+    th, td { padding:8px 9px; }
+    .actions .btn { width:100%; }
+  }
+  @media (max-width:420px) {
+    .stat-row { grid-template-columns:repeat(2,1fr); }
+    .stat-tile .num { font-size:19px; }
+    .page-title { font-size:17.5px; }
   }
 </style>
 </head>
