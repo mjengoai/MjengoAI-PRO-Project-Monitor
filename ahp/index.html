@@ -92,11 +92,11 @@
   @media print { .sidebar, .actions { display:none; } .shell { grid-template-columns:1fr; } body { background:#fff; color:#000; } }
   @media (max-width:860px) {
     .shell { grid-template-columns:1fr; }
-    .sidebar { position:static; height:auto; padding:10px 12px; }
-    .sidebar .brand { display:inline-block; padding:0 8px 0 0; }
+    .sidebar { position:static; height:auto; padding:10px 0 10px 12px; display:flex; align-items:center; gap:0; }
+    .sidebar .brand { flex-shrink:0; padding:0 10px 0 0; margin-right:6px; border-right:1px solid var(--border); }
     .sidebar .brand-sub { display:none; }
-    .sidebar .group-label { display:none; }
-    .sidebar { display:flex; align-items:center; gap:4px; overflow-x:auto; -webkit-overflow-scrolling:touch; white-space:nowrap; }
+    .nav-scroll { display:flex; align-items:center; gap:4px; overflow-x:auto; -webkit-overflow-scrolling:touch; white-space:nowrap; padding-right:12px; }
+    .nav-scroll .group-label { display:none; }
     .nav-item { flex-shrink:0; padding:7px 12px; border-radius:999px; background:var(--panel-2); margin-bottom:0; }
     .nav-item.active { background:rgba(55,138,221,.18); }
     .main { padding:16px 14px 40px; }
@@ -128,6 +128,7 @@
   <div class="sidebar">
     <div class="brand">MjengoAI <span class="accent">OS</span></div>
     <div class="brand-sub">STATE DEPARTMENT FOR<br>HOUSING &amp; URBAN DEV.<br>7 SUB-PROGRAMMES · REFERENCE BUILD</div>
+    <div class="nav-scroll">
     <div class="group-label">Dashboard</div>
     <div class="nav-item active"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>Project Monitor</div>
     <div class="group-label">Projects</div>
@@ -142,6 +143,7 @@
     <div class="group-label">Site reports</div>
     <div class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>Daily report</div>
     <div class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span>Verification log</div>
+    </div>
   </div>
   <div class="main">
     <div class="mockup-banner">
