@@ -25,6 +25,8 @@
   .brand-sub { font-size:11px; color:var(--text-dim); padding:0 10px 16px; line-height:1.5; }
   .group-label { font-size:10.5px; letter-spacing:.07em; text-transform:uppercase; color:var(--text-dimmer); padding:0 10px; margin:14px 0 6px; }
   .nav-item { display:flex; align-items:center; gap:10px; padding:7px 10px; border-radius:6px; font-size:14px; color:var(--text-dim); margin-bottom:1px; }
+  .nav-item[onclick] { cursor:pointer; }
+  .nav-item[onclick]:hover { background:var(--panel-2); color:var(--text); }
   .nav-icon { display:flex; flex-shrink:0; }
   .nav-icon svg { width:15px; height:15px; stroke:currentColor; }
   .nav-item.active { background:rgba(55,138,221,.12); color:var(--accent); font-weight:600; }
@@ -134,7 +136,8 @@
     <div class="group-label">Projects</div>
     <div class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg></span>Funded sites (8)</div>
     <div class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>Financial report</div>
-    <div class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>Delivery partners</div>
+    <div class="nav-item" onclick="document.getElementById('contractors-card').scrollIntoView({behavior:'smooth',block:'start'})"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M17 7V5a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v2"/></svg></span>Contractors</div>
+    <div class="nav-item" onclick="document.getElementById('partners-card').scrollIntoView({behavior:'smooth',block:'start'})"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>Delivery partners</div>
     <div class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>Pending actions</div>
     <div class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>Snags across sites</div>
     <div class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>Permits expiring soon</div>
@@ -148,7 +151,7 @@
   <div class="main">
     <div class="mockup-banner">
       <span class="ic">⚠️</span>
-      <span class="tx"><b>Demo mockup — not live data.</b> Built to show what a Foundation programme dashboard could look like. Site names, counties, and grant values are drawn from public reporting; everything else (disbursements, status flags, pending actions, verification rates, tranche turnaround, days-silent, the placeholder site, the Tender Analyser trial) is illustrative only, see footer for the full breakdown.</span>
+      <span class="tx"><b>Demo mockup — not live data.</b> Built to show what a Foundation programme dashboard could look like. Site names, counties, and grant values are drawn from public reporting; everything else (disbursements, status flags, pending actions, verification rates, tranche turnaround, days-silent, contractor names, the placeholder site, the Tender Analyser trial) is illustrative only, see footer for the full breakdown.</span>
     </div>
     <p class="page-title">Safaricom Foundation — <span class="accent">Project Monitor</span></p>
     <p class="page-sub">Foundation-funded construction projects across Education, Health, Economic Empowerment and Water &amp; Environment · KES 476.0M combined grant value · 8 sites (incl. 1 illustrative placeholder)</p>
@@ -167,6 +170,7 @@
       <div class="stat-tile"><div class="label">Verification pass rate*</div><div class="num">84%</div></div>
       <div class="stat-tile"><div class="label">Avg. tranche turnaround*</div><div class="num">21 days</div></div>
       <div class="stat-tile warn"><div class="label">Permits expiring soon*</div><div class="num">2</div></div>
+      <div class="stat-tile"><div class="label">Contractors*</div><div class="num">6</div></div>
       <div class="stat-tile"><div class="label">Partner groups</div><div class="num">4</div></div>
     </div>
 
@@ -196,7 +200,17 @@
         <p class="desc">Days since last verified progress update (modeled)</p>
         <div class="silent-row"><span class="p">500-School Programme, Phase 2 (illustrative placeholder)</span><span class="d">94 days</span></div>
       </div>
-      <div class="card">
+      <div class="card" id="contractors-card">
+        <h3>Contractors*</h3>
+        <p class="desc">The firms that build — illustrative placeholders, not actual company names</p>
+        <div class="table-wrap">
+        <table>
+          <thead><tr><th>Contractor</th><th class="num">Sites</th><th class="num">Stalled</th><th class="num">Avg. tranche days*</th></tr></thead>
+          <tbody id="buildersRows"></tbody>
+        </table>
+        </div>
+      </div>
+      <div class="card" id="partners-card">
         <h3>Delivery partners</h3>
         <p class="desc">Sites and status per delivery-partner group</p>
         <div class="table-wrap">
@@ -229,7 +243,7 @@
     <div class="card table-wrap" style="padding:0;">
       <table>
         <thead>
-          <tr><th>Health</th><th>Site</th><th>Focus area</th><th>Contractor / partner</th><th>Target</th><th class="num">Grant value (KES)</th><th class="num">Disbursed* (KES)</th><th class="num">Pending*</th></tr>
+          <tr><th>Health</th><th>Site</th><th>Focus area</th><th>Contractor*</th><th>Delivery partner</th><th>Target</th><th class="num">Grant value (KES)</th><th class="num">Disbursed* (KES)</th><th class="num">Pending*</th></tr>
         </thead>
         <tbody id="rows"></tbody>
       </table>
@@ -237,7 +251,7 @@
 
     <div class="assumptions">
       <b>Sourced from public reporting:</b> site names, counties, and approximate grant values are drawn from the Safaricom Foundation website and press coverage as of September 2026 — Kihate Comprehensive School, Mukurweini (KES 95m, first phase of the Foundation's 500-school programme, groundbreaking July 2026); Sango and Makhwabuye Comprehensive Schools, Lugari (KES 60m and 55m); Likoni Level 4 Hospital maternity wing (KES 50m: 37m construction, 13m equipment); Moi's Bridge Health Centre maternity wing (KES 65m excluding equipment, ~10.5-month build after site handover in July 2026); Kianjakoma Health Centre maternity wing, Embu (KES 45m); Wiyumiririe TVC ICT lab, Laikipia (KES 3.5m); and the Ndau solar desalination plant, Lamu (KES 7.5m, handed over November 2019). Some coverage refers to the Foundation's programmes as M-PESA Foundation. Contractors are not named in the coverage reviewed, and most completion dates are not published.<br><br>
-      <b>*Marked with an asterisk — modeled, not publicly tracked:</b> disbursements, status flags, pending actions, verification pass rate, tranche turnaround, permits expiring, days-silent, and the Tender Analyser trial are illustrative and are not findings about any named project. The 500-School Programme Phase 2 row is a placeholder, not a real site (its KES 95m value assumes the same scale as Kihate); it is included so the stalled-site view can be demonstrated. No single system currently publishes this operational layer across a foundation's funded sites — surfacing it is the gap the Foundation Programme Dashboard is proposed to close, per the Executive Brief, once real reporting flows through MjengoAI PRO.
+      <b>*Marked with an asterisk — modeled, not publicly tracked:</b> disbursements, status flags, pending actions, verification pass rate, tranche turnaround, permits expiring, days-silent, the Contractors card and Contractor* column, and the Tender Analyser trial are illustrative and are not findings about any named project. Since the coverage reviewed does not name the building contractors, every contractor label ("Contractor A (NCA-5, illustrative)" and similar) is a placeholder standing in for an unnamed firm — real contractor names will be substituted once available. Delivery partners (county governments, schools and training institutions, and the community-based organisation) are drawn from public reporting and are not placeholders. The 500-School Programme Phase 2 row is a placeholder, not a real site (its KES 95m value assumes the same scale as Kihate); it is included so the stalled-site view can be demonstrated. No single system currently publishes this operational layer across a foundation's funded sites — surfacing it is the gap the Foundation Programme Dashboard is proposed to close, per the Executive Brief, once real reporting flows through MjengoAI PRO.
     </div>
   </div>
 </div>
@@ -250,14 +264,14 @@ const programmes = {
   water: { label: 'Water & Environment', color: '#30b8c9' }
 };
 const projects = [
-  { name: 'Kihate Comprehensive School Upgrade — Mukurweini, Nyeri', programme: 'education', contractor: 'Not publicly disclosed', target: 'Not published', planned: 95000000, paid: 9500000, pending: 1, health: 'ontrack' },
-  { name: 'Sango & Makhwabuye Comprehensive Schools — Lugari, Kakamega', programme: 'education', contractor: 'Not publicly disclosed', target: 'Not published', planned: 115000000, paid: 40000000, pending: 2, health: 'ontrack' },
-  { name: '500-School Programme, Phase 2 site — County TBC (illustrative placeholder)', programme: 'education', contractor: 'Not yet identified', target: 'Illustrative', planned: 95000000, paid: 12000000, pending: 4, health: 'stalled' },
-  { name: 'Likoni Level 4 Hospital Maternity Wing — Mombasa', programme: 'health', contractor: 'Mombasa County Government (partner)', target: 'Not published', planned: 50000000, paid: 30000000, pending: 1, health: 'ontrack' },
-  { name: "Moi's Bridge Health Centre Maternity Wing — Uasin Gishu", programme: 'health', contractor: 'Contractor not named · Uasin Gishu County (partner)', target: '~May 2027', planned: 65000000, paid: 6500000, pending: 1, health: 'ontrack' },
-  { name: 'Kianjakoma Health Centre Maternity Wing — Embu', programme: 'health', contractor: 'Embu County Government (partner)', target: 'Reported delivered', planned: 45000000, paid: 45000000, pending: 0, health: 'ontrack' },
-  { name: 'Wiyumiririe TVC ICT Lab — Laikipia', programme: 'economic', contractor: 'Wiyumiririe TVC (grantee)', target: 'Handed over', planned: 3500000, paid: 3500000, pending: 0, health: 'ontrack' },
-  { name: 'Ndau Solar Desalination Plant — Lamu', programme: 'water', contractor: 'Community-based organisation (operator)', target: 'Handed over (Nov 2019)', planned: 7500000, paid: 7500000, pending: 0, health: 'ontrack' }
+  { name: 'Kihate Comprehensive School Upgrade — Mukurweini, Nyeri', programme: 'education', contractorName: 'Contractor A (NCA-6, illustrative)', deliveryPartner: '—', target: 'Not published', planned: 95000000, paid: 9500000, pending: 1, health: 'ontrack' },
+  { name: 'Sango & Makhwabuye Comprehensive Schools — Lugari, Kakamega', programme: 'education', contractorName: 'Contractor B (NCA-5, illustrative)', deliveryPartner: '—', target: 'Not published', planned: 115000000, paid: 40000000, pending: 2, health: 'ontrack' },
+  { name: '500-School Programme, Phase 2 site — County TBC (illustrative placeholder)', programme: 'education', contractorName: 'Not yet identified (placeholder)', deliveryPartner: '—', target: 'Illustrative', planned: 95000000, paid: 12000000, pending: 4, health: 'stalled' },
+  { name: 'Likoni Level 4 Hospital Maternity Wing — Mombasa', programme: 'health', contractorName: 'Contractor C (NCA-4, illustrative)', deliveryPartner: 'Mombasa County Government', target: 'Not published', planned: 50000000, paid: 30000000, pending: 1, health: 'ontrack' },
+  { name: "Moi's Bridge Health Centre Maternity Wing — Uasin Gishu", programme: 'health', contractorName: 'Contractor D (NCA-5, illustrative)', deliveryPartner: 'Uasin Gishu County Government', target: '~May 2027', planned: 65000000, paid: 6500000, pending: 1, health: 'ontrack' },
+  { name: 'Kianjakoma Health Centre Maternity Wing — Embu', programme: 'health', contractorName: 'Contractor E (NCA-6, illustrative)', deliveryPartner: 'Embu County Government', target: 'Reported delivered', planned: 45000000, paid: 45000000, pending: 0, health: 'ontrack' },
+  { name: 'Wiyumiririe TVC ICT Lab — Laikipia', programme: 'economic', contractorName: '—', deliveryPartner: 'Wiyumiririe TVC (grantee)', target: 'Handed over', planned: 3500000, paid: 3500000, pending: 0, health: 'ontrack' },
+  { name: 'Ndau Solar Desalination Plant — Lamu', programme: 'water', contractorName: '—', deliveryPartner: 'Community-based organisation (operator)', target: 'Handed over (Nov 2019)', planned: 7500000, paid: 7500000, pending: 0, health: 'ontrack' }
 ];
 const progTotal = k => projects.filter(p => p.programme === k).reduce((sum, p) => sum + p.planned, 0);
 const badge = { stalled: ['stalled', 'Stalled'], attention: ['attention', 'Needs attention'], ontrack: ['ontrack', 'On track'] };
@@ -298,7 +312,7 @@ function renderRows() {
       <td><span class="badge ${badge[p.health][0]}">${badge[p.health][1]}</span></td>
       <td>${p.name}</td>
       <td><span class="badge prog">${programmes[p.programme].label}</span></td>
-      <td>${p.contractor}</td><td>${p.target}</td>
+      <td>${p.contractorName}</td><td>${p.deliveryPartner}</td><td>${p.target}</td>
       <td class="num">${p.planned.toLocaleString('en-KE')}</td>
       <td class="num">${p.paid.toLocaleString('en-KE')}</td>
       <td class="num">${p.pending}</td>
@@ -327,6 +341,19 @@ const contractors = [
   { name: 'Not yet identified (placeholder site)', projects: 1, stalled: 1, avgIpc: null }
 ];
 document.getElementById('contractorRows').innerHTML = contractors.map(c => `
+  <tr><td>${c.name}</td><td class="num">${c.projects}</td>
+    <td class="num" style="${c.stalled ? 'color:var(--err);font-weight:700;' : ''}">${c.stalled}</td>
+    <td class="num">${c.avgIpc !== null ? c.avgIpc + ' days' : '—'}</td></tr>`).join('');
+
+const builders = [
+  { name: 'Contractor A (NCA-6, illustrative)', projects: 1, stalled: 0, avgIpc: 22 },
+  { name: 'Contractor B (NCA-5, illustrative)', projects: 1, stalled: 0, avgIpc: 19 },
+  { name: 'Contractor C (NCA-4, illustrative)', projects: 1, stalled: 0, avgIpc: 17 },
+  { name: 'Contractor D (NCA-5, illustrative)', projects: 1, stalled: 0, avgIpc: 26 },
+  { name: 'Contractor E (NCA-6, illustrative)', projects: 1, stalled: 0, avgIpc: 20 },
+  { name: 'Not yet identified (placeholder)', projects: 1, stalled: 1, avgIpc: null }
+];
+document.getElementById('buildersRows').innerHTML = builders.map(c => `
   <tr><td>${c.name}</td><td class="num">${c.projects}</td>
     <td class="num" style="${c.stalled ? 'color:var(--err);font-weight:700;' : ''}">${c.stalled}</td>
     <td class="num">${c.avgIpc !== null ? c.avgIpc + ' days' : '—'}</td></tr>`).join('');
