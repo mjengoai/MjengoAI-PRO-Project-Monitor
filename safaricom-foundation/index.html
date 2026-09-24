@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MjengoAI OS — Project Monitor — Safaricom Foundation</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root {
+    --bg: #0b0b0b; --panel: #131313; --panel-2: #1a1a1a; --border: #2b2b2b;
+    --text: #fff; --text-dim: #999; --text-dimmer: #666;
+    --accent: #378add; --amber: #c98500; --green: #0ca30c;
+    --ok: #5DCAA5; --ok-bg: rgba(93,202,165,.12);
+    --warn: #D8A030; --warn-bg: rgba(216,160,48,.12);
+    --err: #e05a4f; --err-bg: rgba(224,90,79,.12);
+    --radius: 8px;
+    padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  * { box-sizing: border-box; min-width: 0; }
+  html, body { margin:0; padding:0; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; font-size:16.5px; overflow-x:hidden; }
+  .shell { display:grid; grid-template-columns:220px 1fr; min-height:100vh; }
+  .sidebar { border-right:1px solid var(--border); background:var(--panel); padding:18px 10px; position:sticky; top:0; height:100vh; overflow-y:auto; }
+  .brand { font-size:16px; font-weight:700; padding:4px 10px 4px; }
+  .brand .accent { color:var(--accent); }
+  .brand-sub { font-size:11px; color:var(--text-dim); padding:0 10px 16px; line-height:1.5; }
+  .group-label { font-size:10.5px; letter-spacing:.07em; text-transform:uppercase; color:var(--text-dimmer); padding:0 10px; margin:14px 0 6px; }
+  .nav-item { display:flex; align-items:center; gap:10px; padding:7px 10px; border-radius:6px; font-size:14px; color:var(--text-dim); margin-bottom:1px; }
+  .nav-icon { display:flex; flex-shrink:0; }
+  .nav-icon svg { width:15px; height:15px; stroke:currentColor; }
+  .nav-item.active { background:rgba(55,138,221,.12); color:var(--accent); font-weight:600; }
+  .main { padding:26px 32px 60px; max-width:100%; }
+  .gov-banner { font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--text-dimmer); border:1px solid var(--border); border-radius:6px; padding:6px 10px; display:inline-block; margin-bottom:12px; }
+  .mockup-banner { display:flex; align-items:flex-start; gap:10px; background:var(--warn-bg); border:1px solid rgba(216,160,48,.5); border-radius:var(--radius); padding:12px 14px; margin-bottom:18px; }
+  .mockup-banner .ic { font-size:18px; line-height:1; flex-shrink:0; }
+  .mockup-banner .tx { font-size:14.5px; color:var(--text); line-height:1.5; }
+  .mockup-banner .tx b { color:var(--warn); text-transform:uppercase; letter-spacing:.03em; font-size:12.5px; }
+  @media print { .mockup-banner { border-color:#000; background:#fff; } }
+  .page-title { font-size:22px; font-weight:700; margin:0; }
+  .page-title .accent { color:var(--accent); }
+  .page-sub { font-size:14.5px; color:var(--text-dim); margin-top:4px; }
+  .actions { display:flex; gap:10px; margin-top:14px; }
+  .btn { background:var(--panel-2); border:1px solid var(--border); color:var(--text); border-radius:var(--radius); padding:8px 14px; font-size:13.5px; cursor:pointer; }
+  .btn:hover { border-color:var(--accent); color:var(--accent); }
+  .stat-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin:20px 0; }
+  .stat-tile { border-radius:var(--radius); padding:14px; background:var(--panel); border:1px solid var(--border); }
+  .stat-tile .label { font-size:13px; text-transform:uppercase; letter-spacing:.03em; margin-bottom:8px; color:var(--text-dim); }
+  .stat-tile .num { font-size:28px; font-weight:700; line-height:1; }
+  .stat-tile.blue { background:rgba(55,138,221,.12); border-color:rgba(55,138,221,.3); }
+  .stat-tile.blue .label, .stat-tile.blue .num { color:var(--accent); }
+  .stat-tile.amber { background:rgba(201,133,0,.14); border-color:rgba(201,133,0,.3); }
+  .stat-tile.amber .label, .stat-tile.amber .num { color:var(--amber); }
+  .stat-tile.green { background:rgba(12,163,12,.12); border-color:rgba(12,163,12,.3); }
+  .stat-tile.green .label, .stat-tile.green .num { color:var(--green); }
+  .stat-tile.warn { background:var(--warn-bg); border-color:rgba(216,160,48,.3); }
+  .stat-tile.warn .label, .stat-tile.warn .num { color:var(--warn); }
+  .stat-tile.err { background:var(--err-bg); border-color:rgba(224,90,79,.3); }
+  .stat-tile.err .label, .stat-tile.err .num { color:var(--err); }
+  .section-label { font-size:13.5px; color:var(--text-dim); margin:26px 0 10px; }
+  .row-2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:14px; }
+  .row-3 { display:grid; grid-template-columns:repeat(auto-fit,minmax(320px,1fr)); gap:14px; margin-top:14px; }
+  .card { background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:16px; }
+  .card h3 { font-size:17.5px; font-weight:600; margin:0 0 3px; }
+  .card .desc { font-size:14px; color:var(--text-dim); margin:0 0 12px; }
+  .donut-wrap { display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+  .donut-box { position:relative; width:112px; height:112px; flex-shrink:0; }
+  .legend-row { display:flex; align-items:center; gap:8px; padding:7px 8px; border-radius:6px; cursor:pointer; margin:0 -8px; font-size:15px; }
+  .legend-row:hover { background:var(--panel-2); }
+  .legend-row.active { background:var(--panel-2); outline:1px solid var(--border); }
+  .legend-row .sw { width:9px; height:9px; border-radius:2px; flex-shrink:0; }
+  .legend-row .name { flex:1; color:var(--text-dim); }
+  .legend-row .n { font-weight:700; }
+  .filter-note { font-size:12px; color:var(--text-dimmer); margin:6px 0 0; }
+  .silent-row { display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:var(--err-bg); border-radius:8px; margin-bottom:8px; gap:10px; flex-wrap:wrap; }
+  .silent-row .p { font-size:14px; color:var(--err); }
+  .silent-row .d { font-size:15.5px; font-weight:700; color:var(--err); }
+  .table-wrap { overflow-x:auto; }
+  table { width:100%; border-collapse:collapse; font-size:14.5px; }
+  th { text-align:left; padding:9px 12px; color:var(--text-dimmer); font-weight:600; text-transform:uppercase; font-size:12px; letter-spacing:.03em; border-bottom:1px solid var(--border); white-space:nowrap; }
+  th.num, td.num { text-align:right; }
+  td { padding:10px 12px; border-bottom:1px solid var(--border); }
+  tr:last-child td { border-bottom:none; }
+  .badge { font-size:13px; padding:3px 8px; border-radius:var(--radius); font-weight:600; white-space:nowrap; }
+  .badge.ontrack { background:var(--ok-bg); color:var(--ok); }
+  .badge.attention { background:var(--warn-bg); color:var(--warn); }
+  .badge.stalled { background:var(--err-bg); color:var(--err); }
+  .badge.pass { background:var(--ok-bg); color:var(--ok); }
+  .badge.flag { background:var(--err-bg); color:var(--err); }
+  .badge.prog { background:var(--panel-2); color:var(--text-dim); border:1px solid var(--border); }
+  select { background:var(--panel-2); border:1px solid var(--border); color:var(--text); border-radius:var(--radius); padding:6px 10px; font-size:13.5px; }
+  .assumptions { margin-top:26px; border-top:1px solid var(--border); padding-top:14px; font-size:12px; color:var(--text-dimmer); line-height:1.65; }
+  .assumptions b { color:var(--text-dim); }
+  @media print { .sidebar, .actions { display:none; } .shell { grid-template-columns:1fr; } body { background:#fff; color:#000; } }
+  @media (max-width:860px) {
+    .shell { grid-template-columns:1fr; }
+    .sidebar { position:static; height:auto; padding:10px 0 10px 12px; display:flex; align-items:center; gap:0; }
+    .sidebar .brand { flex-shrink:0; padding:0 10px 0 0; margin-right:6px; border-right:1px solid var(--border); }
+    .sidebar .brand-sub { display:none; }
+    .nav-scroll { display:flex; align-items:center; gap:4px; overflow-x:auto; -webkit-overflow-scrolling:touch; white-space:nowrap; padding-right:12px; }
+    .nav-scroll .group-label { display:none; }
+    .nav-item { flex-shrink:0; padding:7px 12px; border-radius:999px; background:var(--panel-2); margin-bottom:0; }
+    .nav-item.active { background:rgba(55,138,221,.18); }
+    .main { padding:16px 14px 40px; }
+    .page-title { font-size:19px; line-height:1.3; }
+    .page-sub { font-size:13px; }
+    .mockup-banner { padding:10px 12px; }
+    .mockup-banner .tx { font-size:13px; }
+    .stat-row { grid-template-columns:repeat(2,1fr); gap:8px; margin:14px 0; }
+    .stat-tile { padding:11px; }
+    .stat-tile .num { font-size:21px; }
+    .stat-tile .label { font-size:11px; margin-bottom:5px; }
+    .row-2, .row-3 { grid-template-columns:1fr; gap:10px; }
+    .card { padding:13px; }
+    .card h3 { font-size:16px; }
+    .donut-box { width:96px; height:96px; }
+    table { font-size:13px; }
+    th, td { padding:8px 9px; }
+    .actions .btn { width:100%; }
+  }
+  @media (max-width:420px) {
+    .stat-row { grid-template-columns:repeat(2,1fr); }
+    .stat-tile .num { font-size:19px; }
+    .page-title { font-size:17.5px; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="sidebar">
+    <div class="brand">MjengoAI <span class="accent">OS</span></div>
+    <div class="brand-sub">SAFARICOM FOUNDATION<br>CONSTRUCTION PORTFOLIO<br>4 FOCUS AREAS · REFERENCE BUILD</div>
+    <div class="nav-scroll">
+    <div class="group-label">Dashboard</div>
+    <div class="nav-item active"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></span>Project Monitor</div>
+    <div class="group-label">Projects</div>
+    <div class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg></span>Funded sites (8)</div>
+    <div class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>Financial report</div>
+    <div class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>Delivery partners</div>
+    <div class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>Pending actions</div>
+    <div class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>Snags across sites</div>
+    <div class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>Permits expiring soon</div>
+    <div class="group-label">Procurement</div>
+    <div class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>Tender Analyser</div>
+    <div class="group-label">Site reports</div>
+    <div class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>Daily report</div>
+    <div class="nav-item"><span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span>Verification log</div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="mockup-banner">
+      <span class="ic">⚠️</span>
+      <span class="tx"><b>Demo mockup — not live data.</b> Built to show what a Foundation programme dashboard could look like. Site names, counties, and grant values are drawn from public reporting; everything else (disbursements, status flags, pending actions, verification rates, tranche turnaround, days-silent, the placeholder site, the Tender Analyser trial) is illustrative only, see footer for the full breakdown.</span>
+    </div>
+    <p class="page-title">Safaricom Foundation — <span class="accent">Project Monitor</span></p>
+    <p class="page-sub">Foundation-funded construction projects across Education, Health, Economic Empowerment and Water &amp; Environment · KES 476.0M combined grant value · 8 sites (incl. 1 illustrative placeholder)</p>
+    <div class="actions"><button class="btn" onclick="window.print()">Generate report</button></div>
+
+    <div class="stat-row">
+      <div class="stat-tile"><div class="label">Funded sites</div><div class="num">8</div></div>
+      <div class="stat-tile blue"><div class="label">Grant value</div><div class="num">KES 476.0M</div></div>
+      <div class="stat-tile amber"><div class="label">Disbursed to date*</div><div class="num">KES 154.0M</div></div>
+      <div class="stat-tile green"><div class="label">Balance</div><div class="num">KES 322.0M</div></div>
+      <div class="stat-tile warn"><div class="label">Pending actions*</div><div class="num">9</div></div>
+      <div class="stat-tile err"><div class="label">Stalled</div><div class="num">1</div></div>
+    </div>
+
+    <div class="stat-row">
+      <div class="stat-tile"><div class="label">Verification pass rate*</div><div class="num">84%</div></div>
+      <div class="stat-tile"><div class="label">Avg. tranche turnaround*</div><div class="num">21 days</div></div>
+      <div class="stat-tile warn"><div class="label">Permits expiring soon*</div><div class="num">2</div></div>
+      <div class="stat-tile"><div class="label">Partner groups</div><div class="num">4</div></div>
+    </div>
+
+    <div class="row-2">
+      <div class="card">
+        <h3>Portfolio health</h3>
+        <p class="desc">Click a slice or legend row to filter the list below</p>
+        <div class="donut-wrap">
+          <div class="donut-box"><canvas id="healthDonut" role="img" aria-label="Donut chart of site health across 8 funded sites">On track 7, needs attention 0, stalled 1</canvas></div>
+          <div id="legend" style="flex:1;"></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Grant value by focus area</h3>
+        <p class="desc">KES, all funded sites · click to filter</p>
+        <div class="donut-wrap">
+          <div class="donut-box"><canvas id="progDonut" role="img" aria-label="Grant value by focus area across Education, Health, Economic Empowerment, and Water and Environment">Focus area value split</canvas></div>
+          <div id="progLegend" style="flex:1;"></div>
+        </div>
+        <p class="filter-note" id="progFilterNote"></p>
+      </div>
+    </div>
+
+    <div class="row-3">
+      <div class="card">
+        <h3>Days silent — stalled sites*</h3>
+        <p class="desc">Days since last verified progress update (modeled)</p>
+        <div class="silent-row"><span class="p">500-School Programme, Phase 2 (illustrative placeholder)</span><span class="d">94 days</span></div>
+      </div>
+      <div class="card">
+        <h3>Delivery partners</h3>
+        <p class="desc">Sites and status per delivery-partner group</p>
+        <div class="table-wrap">
+        <table>
+          <thead><tr><th>Partner group</th><th class="num">Sites</th><th class="num">Stalled</th><th class="num">Avg. tranche days*</th></tr></thead>
+          <tbody id="contractorRows"></tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:14px;">
+      <h3>Grant value: disbursed* vs total, by site</h3>
+      <p class="desc">KES, all 8 funded sites</p>
+      <div style="position:relative;width:100%;height:290px;"><canvas id="budgetChart" role="img" aria-label="Bar chart comparing disbursed value to total contract value per site"></canvas></div>
+    </div>
+
+    <div class="card" style="margin-top:14px;">
+      <h3>Tender Analyser — sample trial against a school-works tender</h3>
+      <p class="desc">Illustrative first-pass compliance run against a sample civil-works tender for a school upgrade under the Foundation's school infrastructure programme — bidder names below are placeholders, not actual submissions</p>
+      <div class="table-wrap">
+      <table>
+        <thead><tr><th>Bidder</th><th>NCA class</th><th class="num">Status</th></tr></thead>
+        <tbody id="tenderRows"></tbody>
+      </table>
+      </div>
+    </div>
+
+    <p class="section-label" id="listLabel">All 8 funded sites</p>
+    <div class="card table-wrap" style="padding:0;">
+      <table>
+        <thead>
+          <tr><th>Health</th><th>Site</th><th>Focus area</th><th>Contractor / partner</th><th>Target</th><th class="num">Grant value (KES)</th><th class="num">Disbursed* (KES)</th><th class="num">Pending*</th></tr>
+        </thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+
+    <div class="assumptions">
+      <b>Sourced from public reporting:</b> site names, counties, and approximate grant values are drawn from the Safaricom Foundation website and press coverage as of September 2026 — Kihate Comprehensive School, Mukurweini (KES 95m, first phase of the Foundation's 500-school programme, groundbreaking July 2026); Sango and Makhwabuye Comprehensive Schools, Lugari (KES 60m and 55m); Likoni Level 4 Hospital maternity wing (KES 50m: 37m construction, 13m equipment); Moi's Bridge Health Centre maternity wing (KES 65m excluding equipment, ~10.5-month build after site handover in July 2026); Kianjakoma Health Centre maternity wing, Embu (KES 45m); Wiyumiririe TVC ICT lab, Laikipia (KES 3.5m); and the Ndau solar desalination plant, Lamu (KES 7.5m, handed over November 2019). Some coverage refers to the Foundation's programmes as M-PESA Foundation. Contractors are not named in the coverage reviewed, and most completion dates are not published.<br><br>
+      <b>*Marked with an asterisk — modeled, not publicly tracked:</b> disbursements, status flags, pending actions, verification pass rate, tranche turnaround, permits expiring, days-silent, and the Tender Analyser trial are illustrative and are not findings about any named project. The 500-School Programme Phase 2 row is a placeholder, not a real site (its KES 95m value assumes the same scale as Kihate); it is included so the stalled-site view can be demonstrated. No single system currently publishes this operational layer across a foundation's funded sites — surfacing it is the gap the Foundation Programme Dashboard is proposed to close, per the Executive Brief, once real reporting flows through MjengoAI PRO.
+    </div>
+  </div>
+</div>
+
+<script>
+const programmes = {
+  education: { label: 'Education', color: '#378add' },
+  health: { label: 'Health', color: '#d4537e' },
+  economic: { label: 'Economic Empowerment', color: '#eda100' },
+  water: { label: 'Water & Environment', color: '#30b8c9' }
+};
+const projects = [
+  { name: 'Kihate Comprehensive School Upgrade — Mukurweini, Nyeri', programme: 'education', contractor: 'Not publicly disclosed', target: 'Not published', planned: 95000000, paid: 9500000, pending: 1, health: 'ontrack' },
+  { name: 'Sango & Makhwabuye Comprehensive Schools — Lugari, Kakamega', programme: 'education', contractor: 'Not publicly disclosed', target: 'Not published', planned: 115000000, paid: 40000000, pending: 2, health: 'ontrack' },
+  { name: '500-School Programme, Phase 2 site — County TBC (illustrative placeholder)', programme: 'education', contractor: 'Not yet identified', target: 'Illustrative', planned: 95000000, paid: 12000000, pending: 4, health: 'stalled' },
+  { name: 'Likoni Level 4 Hospital Maternity Wing — Mombasa', programme: 'health', contractor: 'Mombasa County Government (partner)', target: 'Not published', planned: 50000000, paid: 30000000, pending: 1, health: 'ontrack' },
+  { name: "Moi's Bridge Health Centre Maternity Wing — Uasin Gishu", programme: 'health', contractor: 'Contractor not named · Uasin Gishu County (partner)', target: '~May 2027', planned: 65000000, paid: 6500000, pending: 1, health: 'ontrack' },
+  { name: 'Kianjakoma Health Centre Maternity Wing — Embu', programme: 'health', contractor: 'Embu County Government (partner)', target: 'Reported delivered', planned: 45000000, paid: 45000000, pending: 0, health: 'ontrack' },
+  { name: 'Wiyumiririe TVC ICT Lab — Laikipia', programme: 'economic', contractor: 'Wiyumiririe TVC (grantee)', target: 'Handed over', planned: 3500000, paid: 3500000, pending: 0, health: 'ontrack' },
+  { name: 'Ndau Solar Desalination Plant — Lamu', programme: 'water', contractor: 'Community-based organisation (operator)', target: 'Handed over (Nov 2019)', planned: 7500000, paid: 7500000, pending: 0, health: 'ontrack' }
+];
+const progTotal = k => projects.filter(p => p.programme === k).reduce((sum, p) => sum + p.planned, 0);
+const badge = { stalled: ['stalled', 'Stalled'], attention: ['attention', 'Needs attention'], ontrack: ['ontrack', 'On track'] };
+const healthColors = { stalled: '#e05a4f', attention: '#D8A030', ontrack: '#5DCAA5' };
+let healthFilter = null;
+let progFilter = null;
+
+function renderLegend() {
+  const counts = { ontrack: 0, attention: 0, stalled: 0 };
+  projects.forEach(p => counts[p.health]++);
+  document.getElementById('legend').innerHTML = Object.keys(counts).map(k => `
+    <div class="legend-row ${healthFilter === k ? 'active' : ''}" data-k="${k}">
+      <span class="sw" style="background:${healthColors[k]}"></span>
+      <span class="name">${badge[k][1]}</span><span class="n">${counts[k]}</span>
+    </div>`).join('');
+  document.querySelectorAll('#legend .legend-row').forEach(el => el.addEventListener('click', () => {
+    healthFilter = healthFilter === el.dataset.k ? null : el.dataset.k;
+    renderLegend(); renderRows();
+  }));
+}
+function renderProgLegend() {
+  document.getElementById('progLegend').innerHTML = Object.keys(programmes).map(k => `
+    <div class="legend-row ${progFilter === k ? 'active' : ''}" data-k="${k}">
+      <span class="sw" style="background:${programmes[k].color}"></span>
+      <span class="name">${programmes[k].label}</span><span class="n">${(progTotal(k)/1e6).toFixed(progTotal(k) < 1e7 ? 1 : 0)}M</span>
+    </div>`).join('');
+  document.querySelectorAll('#progLegend .legend-row').forEach(el => el.addEventListener('click', () => {
+    progFilter = progFilter === el.dataset.k ? null : el.dataset.k;
+    document.getElementById('progFilterNote').textContent = progFilter ? `Filtered to ${programmes[progFilter].label}` : '';
+    renderProgLegend(); renderRows();
+  }));
+}
+function renderRows() {
+  const rows = projects.filter(p => (!healthFilter || p.health === healthFilter) && (!progFilter || p.programme === progFilter));
+  document.getElementById('listLabel').textContent = rows.length === projects.length ? `All ${projects.length} funded sites` : `${rows.length} of ${projects.length} funded sites`;
+  document.getElementById('rows').innerHTML = rows.map(p => `
+    <tr>
+      <td><span class="badge ${badge[p.health][0]}">${badge[p.health][1]}</span></td>
+      <td>${p.name}</td>
+      <td><span class="badge prog">${programmes[p.programme].label}</span></td>
+      <td>${p.contractor}</td><td>${p.target}</td>
+      <td class="num">${p.planned.toLocaleString('en-KE')}</td>
+      <td class="num">${p.paid.toLocaleString('en-KE')}</td>
+      <td class="num">${p.pending}</td>
+    </tr>`).join('');
+}
+renderLegend(); renderProgLegend(); renderRows();
+
+new Chart(document.getElementById('healthDonut'), {
+  type: 'doughnut',
+  data: { labels: ['On track','Needs attention','Stalled'], datasets: [{ data: ['ontrack','attention','stalled'].map(k => projects.filter(p => p.health === k).length), backgroundColor: [healthColors.ontrack, healthColors.attention, healthColors.stalled], borderWidth: 2, borderColor: '#131313' }] },
+  options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { display: false } },
+    onClick: (evt, els) => { if (!els.length) return; const k = ['ontrack','attention','stalled'][els[0].index]; healthFilter = healthFilter === k ? null : k; renderLegend(); renderRows(); } }
+});
+
+new Chart(document.getElementById('progDonut'), {
+  type: 'doughnut',
+  data: { labels: Object.values(programmes).map(p=>p.label), datasets: [{ data: Object.keys(programmes).map(k=>progTotal(k)), backgroundColor: Object.values(programmes).map(p=>p.color), borderWidth: 2, borderColor: '#131313' }] },
+  options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { display: false } },
+    onClick: (evt, els) => { if (!els.length) return; const k = Object.keys(programmes)[els[0].index]; progFilter = progFilter === k ? null : k; document.getElementById('progFilterNote').textContent = progFilter ? `Filtered to ${programmes[progFilter].label}` : ''; renderProgLegend(); renderRows(); } }
+});
+
+const contractors = [
+  { name: 'County governments (Mombasa, Uasin Gishu, Embu)', projects: 3, stalled: 0, avgIpc: 18 },
+  { name: 'Schools & training institutions (Nyeri, Kakamega, Laikipia)', projects: 3, stalled: 0, avgIpc: 24 },
+  { name: 'Community-based organisation (Lamu)', projects: 1, stalled: 0, avgIpc: null },
+  { name: 'Not yet identified (placeholder site)', projects: 1, stalled: 1, avgIpc: null }
+];
+document.getElementById('contractorRows').innerHTML = contractors.map(c => `
+  <tr><td>${c.name}</td><td class="num">${c.projects}</td>
+    <td class="num" style="${c.stalled ? 'color:var(--err);font-weight:700;' : ''}">${c.stalled}</td>
+    <td class="num">${c.avgIpc !== null ? c.avgIpc + ' days' : '—'}</td></tr>`).join('');
+
+const tenderSubs = [
+  { name: 'Bidder 1', nca: 'NCA-2', status: 'pass' },
+  { name: 'Bidder 2', nca: 'NCA-3', status: 'pass' },
+  { name: 'Bidder 3', nca: 'NCA-4', status: 'flag' },
+  { name: 'Bidder 4', nca: 'NCA-5', status: 'pass' },
+  { name: 'Bidder 5', nca: 'NCA-6', status: 'flag' }
+];
+document.getElementById('tenderRows').innerHTML = tenderSubs.map(t => `
+  <tr><td>${t.name}</td><td>${t.nca}</td>
+    <td class="num"><span class="badge ${t.status}">${t.status === 'pass' ? 'Passed compliance' : 'Flagged — missing item'}</span></td></tr>`).join('');
+
+new Chart(document.getElementById('budgetChart'), {
+  type: 'bar',
+  data: {
+    labels: projects.map(p => p.name.length > 24 ? p.name.slice(0, 22) + '…' : p.name),
+    datasets: [
+      { label: 'Grant value', data: projects.map(p => p.planned), backgroundColor: '#2b2b2b', borderRadius: 3, maxBarThickness: 14 },
+      { label: 'Disbursed', data: projects.map(p => p.paid), backgroundColor: '#378add', borderRadius: 3, maxBarThickness: 14 }
+    ]
+  },
+  options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: true, labels: { color: '#ccc', font: { size: 14 } } },
+      tooltip: { bodyFont: { size: 13 }, titleFont: { size: 13 }, callbacks: { label: ctx => ctx.dataset.label + ': KES ' + ctx.raw.toLocaleString('en-KE') } } },
+    scales: { x: { type: 'logarithmic', ticks: { color: '#ccc', font: { size: 13 }, callback: v => { const m=v/1000000; return [1,10,100,1000,10000].includes(m)?m+'M':''; } }, grid: { color: '#222' } },
+      y: { ticks: { color: '#ccc', font: { size: 13 } }, grid: { display: false } } } }
+});
+</script>
+</body>
+</html>
